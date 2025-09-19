@@ -1,6 +1,5 @@
 import 'package:nhit_frontend/features/payment_notes/model/approval_rule_modal.dart';
 
-
 final List<ApprovalRule> approvalRuleData = [
   ApprovalRule(
     approverLevel: 'Approver 1',

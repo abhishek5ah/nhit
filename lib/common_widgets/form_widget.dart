@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:nhit_frontend/common_widgets/file_picker.dart';
 
-enum FormFieldType { text, password, dropdown, checkbox, file }
+enum FormFieldType { text, password, dropdown, checkbox, file, date }
 
 class FormFieldConfig {
   final String label;
@@ -153,6 +153,43 @@ class _ReusableFormState extends State<ReusableForm> {
                   : null,
             );
           },
+        );
+      case FormFieldType.date:
+        // Controller to manage display of the selected date as text
+        final controller =
+            controllers[field.name] ??
+            (controllers[field.name] = TextEditingController(
+              text: field.initialValue ?? '',
+            ));
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: TextFormField(
+            controller: controller,
+            readOnly: true,
+            decoration: InputDecoration(
+              labelText: field.label,
+              border: const OutlineInputBorder(),
+              suffixIcon: const Icon(Icons.calendar_today),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 12,
+              ),
+            ),
+            validator: field.validator,
+            onTap: () async {
+              DateTime? selectedDate = await showDatePicker(
+                context: context,
+                initialDate:
+                    DateTime.tryParse(controller.text) ?? DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime(2100),
+              );
+              if (selectedDate != null) {
+                controller.text =
+                    "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
+              }
+            },
+          ),
         );
     }
   }

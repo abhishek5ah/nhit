@@ -13,9 +13,10 @@ class RoleListTable extends StatefulWidget {
 }
 
 class _RoleListTableState extends State<RoleListTable> {
-  // Filtered list to display
   late List<Role> filteredRoles;
   String searchQuery = '';
+  int rowsPerPage = 10;
+  int currentPage = 0;
 
   @override
   void initState() {
@@ -31,32 +32,138 @@ class _RoleListTableState extends State<RoleListTable> {
         final id = role.id.toString();
         return name.contains(searchQuery) || id.contains(searchQuery);
       }).toList();
+      currentPage = 0; // Reset to first page when search changes
     });
+  }
+
+  void changeRowsPerPage(int? value) {
+    setState(() {
+      rowsPerPage = value ?? 10;
+      currentPage = 0;
+    });
+  }
+
+  void gotoPage(int page) {
+    setState(() {
+      currentPage = page;
+    });
+  }
+
+  void onDeleteRole(Role role) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Confirm Delete"),
+        content: Text("Are you sure you want to delete ${role.roleName}?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+                widget.roleData.removeWhere((r) => r.id == role.id);
+                filteredRoles.removeWhere((r) => r.id == role.id);
+
+                int totalPages = (filteredRoles.length / rowsPerPage).ceil();
+                if (currentPage >= totalPages && currentPage > 0) {
+                  currentPage = totalPages - 1;
+                }
+              });
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    int totalPages = (filteredRoles.length / rowsPerPage).ceil();
+    int start = currentPage * rowsPerPage;
+    int end = (start + rowsPerPage).clamp(0, filteredRoles.length);
+    final paginatedRoles = filteredRoles.sublist(start, end);
+
+    int windowSize = 10;
+    int startWindow = 0;
+    int endWindow = totalPages;
+
+    if (totalPages > windowSize) {
+      if (currentPage <= 4) {
+        startWindow = 0;
+        endWindow = windowSize;
+      } else if (currentPage >= totalPages - 5) {
+        startWindow = totalPages - windowSize;
+        endWindow = totalPages;
+      } else {
+        startWindow = currentPage - 4;
+        endWindow = currentPage + 6;
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search roles',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                // border radius of searchbar
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline,
-                  width: 0.25,
-                ),
-              ),
-            ),
-            onChanged: updateSearch,
+          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Manage Roles", style: Theme.of(context).textTheme.titleLarge),
+              // Optional: Add "Add New Role" button here if needed
+            ],
           ),
         ),
+
+        // Controls: Show entries and Search
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Text("Show", style: Theme.of(context).textTheme.bodyLarge),
+                const SizedBox(width: 8),
+                DropdownButton<int>(
+                  value: rowsPerPage,
+                  items: [5, 10, 20, 50].map((count) {
+                    return DropdownMenuItem<int>(
+                      value: count,
+                      child: Text('$count'),
+                    );
+                  }).toList(),
+                  onChanged: changeRowsPerPage,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(width: 8),
+                Text("entries", style: Theme.of(context).textTheme.bodyLarge),
+              ],
+            ),
+            SizedBox(
+              width: 210,
+              child: TextField(
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  hintText: 'Search roles',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                      width: 0.25,
+                    ),
+                  ),
+                  isDense: true,
+                ),
+                onChanged: updateSearch,
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
 
         Expanded(
           child: CustomTable(
@@ -65,11 +172,7 @@ class _RoleListTableState extends State<RoleListTable> {
               DataColumn(
                 label: SizedBox(
                   width: 50,
-                  child: Text(
-                    'ID',
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                  ),
+                  child: Text('ID', overflow: TextOverflow.ellipsis, softWrap: false),
                 ),
               ),
               DataColumn(
@@ -86,7 +189,7 @@ class _RoleListTableState extends State<RoleListTable> {
               DataColumn(label: Text('Permissions')),
               DataColumn(label: SizedBox(width: 110, child: Text('Action'))),
             ],
-            rows: filteredRoles.map((role) {
+            rows: paginatedRoles.map((role) {
               return DataRow(
                 cells: [
                   DataCell(
@@ -128,10 +231,7 @@ class _RoleListTableState extends State<RoleListTable> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 5,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                           );
                         }).toList(),
                       ),
@@ -144,29 +244,20 @@ class _RoleListTableState extends State<RoleListTable> {
                         children: [
                           Expanded(
                             child: IconButton(
-                              icon: Icon(
-                                Icons.edit,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
                               onPressed: () {},
                             ),
                           ),
                           Expanded(
                             child: IconButton(
-                              icon: Icon(
-                                Icons.remove_red_eye,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
+                              icon: Icon(Icons.remove_red_eye, color: Theme.of(context).colorScheme.primary),
                               onPressed: () {},
                             ),
                           ),
                           Expanded(
                             child: IconButton(
-                              icon: Icon(
-                                Icons.delete,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              onPressed: () {},
+                              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                              onPressed: () => onDeleteRole(role),
                             ),
                           ),
                         ],
@@ -176,6 +267,49 @@ class _RoleListTableState extends State<RoleListTable> {
                 ],
               );
             }).toList(),
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Showing ${filteredRoles.isEmpty ? 0 : start + 1} to $end of ${filteredRoles.length} entries",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
+                  ),
+                  for (int i = startWindow; i < endWindow; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: i == currentPage
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surfaceContainerLow,
+                          foregroundColor: i == currentPage
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurface,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          minimumSize: const Size(0, 36),
+                        ),
+                        child: Text("${i + 1}"),
+                        onPressed: () => gotoPage(i),
+                      ),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],

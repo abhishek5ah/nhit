@@ -14,6 +14,8 @@ class ActivityLogTable extends StatefulWidget {
 class _ActivityLogTableState extends State<ActivityLogTable> {
   late List<ActivityLog> filteredLogs;
   String searchQuery = '';
+  int rowsPerPage = 10;
+  int currentPage = 0;
 
   @override
   void initState() {
@@ -30,32 +32,101 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
             log.timeAgo.toLowerCase().contains(searchQuery) ||
             log.id.toString().contains(searchQuery);
       }).toList();
+      currentPage = 0; // Reset to first page on search change
+    });
+  }
+
+  void changeRowsPerPage(int? value) {
+    setState(() {
+      rowsPerPage = value ?? 10;
+      currentPage = 0;
+    });
+  }
+
+  void gotoPage(int page) {
+    setState(() {
+      currentPage = page;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    int totalPages = (filteredLogs.length / rowsPerPage).ceil();
+    int start = currentPage * rowsPerPage;
+    int end = (start + rowsPerPage).clamp(0, filteredLogs.length);
+    final paginatedLogs = filteredLogs.sublist(start, end);
+
+    int windowSize = 10;
+    int startWindow = 0;
+    int endWindow = totalPages;
+
+    if (totalPages > windowSize) {
+      if (currentPage <= 4) {
+        startWindow = 0;
+        endWindow = windowSize;
+      } else if (currentPage >= totalPages - 5) {
+        startWindow = totalPages - windowSize;
+        endWindow = totalPages;
+      } else {
+        startWindow = currentPage - 4;
+        endWindow = currentPage + 6;
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search Bar
+        // Top controls: Show entries and Search
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
-          child: TextField(
-            decoration: InputDecoration(
-              hintText: 'Search activity logs',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline,
-                  width: 0.25,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text("Show", style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(width: 8),
+                  DropdownButton<int>(
+                    value: rowsPerPage,
+                    items: [5, 10, 20, 50].map((count) {
+                      return DropdownMenuItem<int>(
+                        value: count,
+                        child: Text('$count'),
+                      );
+                    }).toList(),
+                    onChanged: changeRowsPerPage,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(width: 8),
+                  Text("entries", style: Theme.of(context).textTheme.bodyLarge),
+                ],
+              ),
+              SizedBox(
+                width: 210,
+                child: TextField(
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    hintText: 'Search activity logs',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.outline,
+                        width: 0.25,
+                      ),
+                    ),
+                    isDense: true,
+                  ),
+                  onChanged: updateSearch,
                 ),
               ),
-            ),
-            onChanged: updateSearch,
+            ],
           ),
         ),
+
+        const SizedBox(height: 12),
+
+        // Table content
         Expanded(
           child: CustomTable(
             minTableWidth: 1100,
@@ -68,8 +139,9 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
               ),
               DataColumn(label: SizedBox(width: 220, child: Text('Description'))),
               DataColumn(label: SizedBox(width: 120, child: Text('Time Ago'))),
+              // Remove Action column since there's no delete button
             ],
-            rows: filteredLogs.map((log) {
+            rows: paginatedLogs.map((log) {
               return DataRow(
                 cells: [
                   DataCell(
@@ -87,6 +159,50 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
                 ],
               );
             }).toList(),
+          ),
+        ),
+
+        // Pagination controls bottom
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Showing ${filteredLogs.isEmpty ? 0 : start + 1} to $end of ${filteredLogs.length} entries",
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
+                  ),
+                  for (int i = startWindow; i < endWindow; i++)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: i == currentPage
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surfaceContainerLow,
+                          foregroundColor: i == currentPage
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurface,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          minimumSize: const Size(0, 36),
+                        ),
+                        child: Text("${i + 1}"),
+                        onPressed: () => gotoPage(i),
+                      ),
+                    ),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],

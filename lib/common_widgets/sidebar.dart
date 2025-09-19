@@ -55,16 +55,16 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
         _SidebarSubItem("Login History", "/activity/login-history"),
       ],
     ),
-    _SidebarItem(
-      Icons.request_page,
-      "Expense Approval",
-      "/expense-approval",
-      children: [
-        _SidebarSubItem("Create Note", "/expense-approval/create"),
-        _SidebarSubItem("All Notes", "/expense-approval/list"),
-        _SidebarSubItem("Approval Rules", "/expense-approval/rules"),
-      ],
-    ),
+    // _SidebarItem(
+    //   Icons.request_page,
+    //   "Expense Approval",
+    //   "/expense-approval",
+    //   children: [
+    //     _SidebarSubItem("Create Note", "/expense-approval/create"),
+    //     _SidebarSubItem("All Notes", "/expense-approval/list"),
+    //     _SidebarSubItem("Approval Rules", "/expense-approval/rules"),
+    //   ],
+    // ),
     _SidebarItem(
       Icons.payment,
       "Payment Notes",
@@ -74,27 +74,27 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
         _SidebarSubItem("Approval Rules", "/payment-notes/rules"),
       ],
     ),
-    _SidebarItem(
-      Icons.card_travel,
-      "Travel Reimbursement",
-      "/travel",
-      children: [
-        _SidebarSubItem("Create", "/travel/create"),
-        _SidebarSubItem("Create For All", "/travel/create-all"),
-        _SidebarSubItem("All Notes", "/travel/list"),
-      ],
-    ),
-    _SidebarItem(
-      Icons.account_balance,
-      "Bank RTGS/NEFT",
-      "/bank",
-      children: [
-        _SidebarSubItem("List", "/bank/list"),
-        _SidebarSubItem("Create", "/bank/create"),
-        _SidebarSubItem("Bank Letter Rules", "/bank/rules"),
-        _SidebarSubItem("Ratio Create", "/bank/ratio"),
-      ],
-    ),
+    // _SidebarItem(
+    //   Icons.card_travel,
+    //   "Travel Reimbursement",
+    //   "/travel",
+    //   children: [
+    //     _SidebarSubItem("Create", "/travel/create"),
+    //     _SidebarSubItem("Create For All", "/travel/create-all"),
+    //     _SidebarSubItem("All Notes", "/travel/list"),
+    //   ],
+    // ),
+    // _SidebarItem(
+    //   Icons.account_balance,
+    //   "Bank RTGS/NEFT",
+    //   "/bank",
+    //   children: [
+    //     _SidebarSubItem("List", "/bank/list"),
+    //     _SidebarSubItem("Create", "/bank/create"),
+    //     _SidebarSubItem("Bank Letter Rules", "/bank/rules"),
+    //     _SidebarSubItem("Ratio Create", "/bank/ratio"),
+    //   ],
+    // ),
     _SidebarItem(
       Icons.work,
       "Designation",

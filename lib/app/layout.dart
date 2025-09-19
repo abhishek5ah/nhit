@@ -4,8 +4,15 @@ import 'package:nhit_frontend/common_widgets/sidebar.dart';
 
 class LayoutPage extends StatefulWidget {
   final Widget child;
+  final bool isDarkMode;
+  final VoidCallback onToggleTheme;
 
-  const LayoutPage({super.key, required this.child});
+  const LayoutPage({
+    super.key,
+    required this.child,
+    required this.isDarkMode,
+    required this.onToggleTheme,
+  });
 
   @override
   State<LayoutPage> createState() => _LayoutPageState();
@@ -36,7 +43,12 @@ class _LayoutPageState extends State<LayoutPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Navbar(userName: 'Abhishek'),
+                Navbar(
+                  userName: 'Abhishek',
+                  currentLocation: currentRoute,
+                  isDarkMode: widget.isDarkMode,
+                  onToggleTheme: widget.onToggleTheme,
+                ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nhit_frontend/app/layout.dart';
+import 'package:nhit_frontend/app/theme_notifier.dart';
 import 'package:nhit_frontend/features/activity/data/activity_log.dart';
 import 'package:nhit_frontend/features/activity/data/user_login_history.dart';
 import 'package:nhit_frontend/features/activity/screens/activity_logs_page.dart';
@@ -18,6 +19,7 @@ import 'package:nhit_frontend/features/roles/screens/role_list_page.dart';
 import 'package:nhit_frontend/features/users/data/user_list.dart';
 import 'package:nhit_frontend/features/users/screens/add_user_page.dart';
 import 'package:nhit_frontend/features/users/screens/user_list_page.dart';
+import 'package:nhit_frontend/features/vendors/screens/add_vendor_page.dart';
 import 'package:nhit_frontend/features/vendors/screens/vendor_list_page.dart';
 
 import '../features/vendors/data/vendor_list.dart';
@@ -40,7 +42,16 @@ final GoRouter router = GoRouter(
   initialLocation: '/users',
   routes: [
     ShellRoute(
-      builder: (context, state, child) => LayoutPage(child: child),
+      builder: (context, state, child) => ValueListenableBuilder<ThemeMode>(
+          valueListenable: themeModeNotifier,
+          builder: (context, themeMode, _) {
+            return LayoutPage(
+              isDarkMode: themeMode == ThemeMode.dark,
+              onToggleTheme: toggleTheme,
+              child: child,
+            );
+          }
+      ),
       routes: [
         /// ---------------- ACTIVITY ----------------
         GoRoute(
@@ -107,41 +118,42 @@ final GoRouter router = GoRouter(
           const PlaceholderPage(title: 'Vendors Home'),
           routes: [
             GoRoute(
-              path: 'add',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Add Vendor'),
-            ),
-            GoRoute(
               path: 'list',
               builder: (context, state) =>
-              VendorListTable(vendorData: vendorData),
+                  VendorListTable(vendorData: vendorData),
             ),
+            GoRoute(
+              path: 'add',
+              builder: (context, state) =>
+              const AddVendorPage(),
+            ),
+
           ],
         ),
 
         /// ---------------- EXPENSE APPROVAL ----------------
-        GoRoute(
-          path: '/expense-approval',
-          builder: (context, state) =>
-          const PlaceholderPage(title: 'Expense Approval Home'),
-          routes: [
-            GoRoute(
-              path: 'create',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Create Expense Note'),
-            ),
-            GoRoute(
-              path: 'list',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'All Expense Notes'),
-            ),
-            GoRoute(
-              path: 'rules',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Expense Approval Rules'),
-            ),
-          ],
-        ),
+        // GoRoute(
+        //   path: '/expense-approval',
+        //   builder: (context, state) =>
+        //   const PlaceholderPage(title: 'Expense Approval Home'),
+        //   routes: [
+        //     GoRoute(
+        //       path: 'create',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Create Expense Note'),
+        //     ),
+        //     GoRoute(
+        //       path: 'list',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'All Expense Notes'),
+        //     ),
+        //     GoRoute(
+        //       path: 'rules',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Expense Approval Rules'),
+        //     ),
+        //   ],
+        // ),
 
         /// ---------------- PAYMENT NOTES ----------------
         GoRoute(
@@ -157,63 +169,63 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: 'rules',
               builder: (context, state) =>
-                  ApprovalRulesTable(approvalRules: approvalRuleData)
+                  ApprovalRulesTable(approvalRuleData: approvalRuleData)
             ),
           ],
         ),
 
         /// ---------------- TRAVEL REIMBURSEMENT ----------------
-        GoRoute(
-          path: '/travel',
-          builder: (context, state) =>
-          const PlaceholderPage(title: 'Travel Reimbursement Home'),
-          routes: [
-            GoRoute(
-              path: 'create',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Create Travel Note'),
-            ),
-            GoRoute(
-              path: 'create-all',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Create Travel for All Users'),
-            ),
-            GoRoute(
-              path: 'list',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'All Travel Notes'),
-            ),
-          ],
-        ),
+        // GoRoute(
+        //   path: '/travel',
+        //   builder: (context, state) =>
+        //   const PlaceholderPage(title: 'Travel Reimbursement Home'),
+        //   routes: [
+        //     GoRoute(
+        //       path: 'create',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Create Travel Note'),
+        //     ),
+        //     GoRoute(
+        //       path: 'create-all',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Create Travel for All Users'),
+        //     ),
+        //     GoRoute(
+        //       path: 'list',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'All Travel Notes'),
+        //     ),
+        //   ],
+        // ),
 
         /// ---------------- BANK ----------------
-        GoRoute(
-          path: '/bank',
-          builder: (context, state) =>
-          const PlaceholderPage(title: 'Bank RTGS/NEFT Home'),
-          routes: [
-            GoRoute(
-              path: 'list',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Bank List'),
-            ),
-            GoRoute(
-              path: 'create',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Create Bank Entry'),
-            ),
-            GoRoute(
-              path: 'rules',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Bank Letter Rules'),
-            ),
-            GoRoute(
-              path: 'ratio',
-              builder: (context, state) =>
-              const PlaceholderPage(title: 'Bank Ratio Create'),
-            ),
-          ],
-        ),
+        // GoRoute(
+        //   path: '/bank',
+        //   builder: (context, state) =>
+        //   const PlaceholderPage(title: 'Bank RTGS/NEFT Home'),
+        //   routes: [
+        //     GoRoute(
+        //       path: 'list',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Bank List'),
+        //     ),
+        //     GoRoute(
+        //       path: 'create',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Create Bank Entry'),
+        //     ),
+        //     GoRoute(
+        //       path: 'rules',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Bank Letter Rules'),
+        //     ),
+        //     GoRoute(
+        //       path: 'ratio',
+        //       builder: (context, state) =>
+        //       const PlaceholderPage(title: 'Bank Ratio Create'),
+        //     ),
+        //   ],
+        // ),
 
         /// ---------------- DESIGNATION ----------------
         GoRoute(

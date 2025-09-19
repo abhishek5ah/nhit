@@ -5,12 +5,16 @@ class Navbar extends StatelessWidget {
   final String? currentLocation;
   final String userName;
   final String? avatarUrl;
+  final bool isDarkMode;
+  final VoidCallback onToggleTheme;
 
   const Navbar({
     super.key,
     this.currentLocation,
     required this.userName,
     this.avatarUrl,
+    required this.isDarkMode,
+    required this.onToggleTheme,
   });
 
   @override
@@ -44,9 +48,17 @@ class Navbar extends StatelessWidget {
             ),
           ),
 
-          // Right Side Button - Help, Notification, User
+          // Right Side Button - Toggle, Help, Notification, User
           Row(
             children: [
+              IconButton(
+                icon: Icon(
+                  isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                onPressed: onToggleTheme,
+                tooltip: isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode",
+              ),
               IconButton(
                 icon: Icon(
                   Icons.help_outline,
@@ -72,17 +84,17 @@ class Navbar extends StatelessWidget {
                     : null,
                 child: avatarUrl == null
                     ? Text(
-                        userName
-                            .split(" ")
-                            .map((e) => e.isNotEmpty ? e[0] : '')
-                            .join()
-                            .toUpperCase(),
-                        style: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
+                  userName
+                      .split(" ")
+                      .map((e) => e.isNotEmpty ? e[0] : '')
+                      .join()
+                      .toUpperCase(),
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
                     : null,
               ),
               const SizedBox(width: 10),
