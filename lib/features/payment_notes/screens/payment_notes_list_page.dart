@@ -106,7 +106,23 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title and "Add New" Button
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "All Payment Notes",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+
+            ],
+          ),
+        ),
+
         // Top controls: Show entries and Search bar
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -189,7 +205,8 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         child: Text(
                           note.status,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                          style: const TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                       ),
                       const SizedBox(height: 2),

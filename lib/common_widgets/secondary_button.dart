@@ -24,12 +24,12 @@ class SecondaryButton extends StatelessWidget {
 
     final ButtonStyle style =
     FilledButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      minimumSize: const Size(0, 54),
+      padding: const EdgeInsets.symmetric(horizontal: 08, vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(06)),
+      minimumSize: const Size(0, 12),
       side: BorderSide(
         color: Theme.of(context).colorScheme.outline.withValues(alpha:0.5),
-        width: 1.2,
+        width: 0.5,
       ),
     ).copyWith(
       backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
@@ -46,7 +46,7 @@ class SecondaryButton extends StatelessWidget {
         return baseColor;
       }),
       foregroundColor: WidgetStateProperty.all(
-        Theme.of(context).colorScheme.onSecondaryContainer,
+        Theme.of(context).colorScheme.onSurface,
       ),
     );
 

@@ -27,9 +27,9 @@ class PrimaryButton extends StatelessWidget {
 
     final ButtonStyle style =
     FilledButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      minimumSize: const Size(0, 54),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      minimumSize: const Size(0, 12),
     ).copyWith(
       backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
         final baseColor = backgroundColor ?? Theme.of(context).colorScheme.primary;

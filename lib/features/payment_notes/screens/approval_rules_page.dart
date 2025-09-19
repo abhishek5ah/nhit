@@ -103,7 +103,22 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title and "Add New" Button
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Approval Rules",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ],
+          ),
+        ),
+
         // Top controls: Show entries & Search
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
@@ -173,7 +188,7 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
                     IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
                       onPressed: () {
-                        // implement edit
+                        // TODO: implement edit functionality
                       },
                     ),
                     IconButton(

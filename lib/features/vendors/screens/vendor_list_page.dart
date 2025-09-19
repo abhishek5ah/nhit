@@ -115,19 +115,6 @@ class _VendorListTableState extends State<VendorListTable> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Add Vendor", style: Theme.of(context).textTheme.titleLarge),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.add),
-                label: const Text("Add New"),
-                onPressed: () {
-                  // Implement navigation or dialog for adding new vendor
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
