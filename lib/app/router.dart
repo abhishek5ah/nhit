@@ -37,7 +37,7 @@ class PlaceholderPage extends StatelessWidget {
 }
 
 final GoRouter router = GoRouter(
-  initialLocation: '/users/add',
+  initialLocation: '/users',
   routes: [
     ShellRoute(
       builder: (context, state, child) => LayoutPage(child: child),
@@ -88,12 +88,12 @@ final GoRouter router = GoRouter(
           const PlaceholderPage(title: 'Users Home'),
           routes: [
             GoRoute(
-              path: 'add',
+              path: 'list',
               builder: (context, state) =>
                 UserListTable(userData: userData),
             ),
             GoRoute(
-              path: 'list',
+              path: 'add',
               builder: (context, state) =>
                AddUserPage(),
             ),

@@ -33,8 +33,8 @@ class _SidebarState extends State<Sidebar> with SingleTickerProviderStateMixin {
       "Users",
       "/users",
       children: [
-        _SidebarSubItem("User", "/users/add"),
-        _SidebarSubItem("Add New", "/users/list"),
+        _SidebarSubItem("User", "/users/list"),
+        _SidebarSubItem("Add New", "/users/add"),
       ],
     ),
     _SidebarItem(

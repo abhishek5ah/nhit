@@ -39,7 +39,6 @@ class _RoleListTableState extends State<RoleListTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search bar padding and styling
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
           child: TextField(
