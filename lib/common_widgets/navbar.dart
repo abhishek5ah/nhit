@@ -32,7 +32,7 @@ class Navbar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Left: breadcrumbs
+          // breadcrumbs
           Expanded(
             child: Row(
               children: [
@@ -48,7 +48,7 @@ class Navbar extends StatelessWidget {
             ),
           ),
 
-          // Right Side Button - Toggle, Help, Notification, User
+          // right side button
           Row(
             children: [
               IconButton(
@@ -59,14 +59,7 @@ class Navbar extends StatelessWidget {
                 onPressed: onToggleTheme,
                 tooltip: isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode",
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.help_outline,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                onPressed: () {}, // Help action
-                tooltip: "Help",
-              ),
+
               IconButton(
                 icon: Icon(
                   Icons.notifications_none,

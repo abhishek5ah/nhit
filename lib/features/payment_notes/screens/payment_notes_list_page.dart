@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nhit_frontend/features/payment_notes/model/payment_note_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
+import 'package:nhit_frontend/common_widgets/view_modal.dart';
+
 
 class PaymentNotesTable extends StatefulWidget {
   final List<PaymentNote> paymentNotes;
@@ -51,6 +53,25 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
     });
   }
 
+  //view modal
+  void onViewNoteDetails(PaymentNote note) {
+    DetailModal.show(
+      context,
+      title: 'Payment Note Details',
+      contentWidgets: [
+        Text("Serial No: ${note.sno}", style: Theme.of(context).textTheme.bodyLarge),
+        Text("Project Name: ${note.projectName}",),
+        Text("Vendor Name: ${note.vendorName}",),
+        Text("Invoice Value: ${note.invoiceValue}",),
+        Text("Date: ${note.date}",),
+        Text("Status: ${note.status}",),
+        Text("Next Approver: ${note.nextApprover}",),
+      ],
+    );
+  }
+
+
+  //delete modal
   void onDeleteNote(PaymentNote note) {
     showDialog(
       context: context,
@@ -220,9 +241,7 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_red_eye, color: Colors.blue),
-                        onPressed: () {
-                          // Implement view action here
-                        },
+                        onPressed: () => onViewNoteDetails(note),
                       ),
                       const VerticalDivider(width: 1),
                       IconButton(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nhit_frontend/features/vendors/models/vendor_list_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
+import 'package:nhit_frontend/common_widgets/view_modal.dart';  // Adjust path accordingly
+
 
 class VendorListTable extends StatefulWidget {
   final List<Vendor> vendorData;
@@ -48,6 +50,26 @@ class _VendorListTableState extends State<VendorListTable> {
     });
   }
 
+  //view modal
+  void onViewVendor(Vendor vendor) {
+    DetailModal.show(
+      context,
+      title: 'Vendor Details',
+      contentWidgets: [
+        Text("Vendor ID: ${vendor.id}", style: Theme.of(context).textTheme.bodyLarge),
+        Text("Code: ${vendor.code}",),
+        Text("Name: ${vendor.name}",),
+        Text("Email: ${vendor.email}",),
+        Text("Mobile: ${vendor.mobile}",),
+        Text("Beneficiary Name: ${vendor.beneficiaryName}",),
+        const SizedBox(height: 16),
+        Text("Status: ${vendor.status}",),
+      ],
+    );
+  }
+
+
+  //delete modal
   void onDeleteVendor(Vendor vendor) {
     showDialog(
       context: context,
@@ -219,8 +241,8 @@ class _VendorListTableState extends State<VendorListTable> {
                         Expanded(
                           child: IconButton(
                             icon: Icon(Icons.remove_red_eye, color: Theme.of(context).colorScheme.primary),
-                            onPressed: () {
-                              // Implement view action here
+                            onPressed: ()=> {
+                              onViewVendor(vendor)
                             },
                           ),
                         ),

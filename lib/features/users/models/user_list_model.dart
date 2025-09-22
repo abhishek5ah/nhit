@@ -14,4 +14,22 @@ class User {
     required this.roles,
     required this.isActive,
   });
+
+  User copyWith({
+    String? name,
+    String? email,
+    required bool isActive,
+    required String username,
+    required List<String> roles,
+  }) {
+    return User(
+      id: id,
+      name: name ?? this.name,
+      username: username,
+      email: email ?? this.email,
+      roles: List<String>.from(roles),
+      // make a copy to avoid mutation issues
+      isActive: isActive,
+    );
+  }
 }

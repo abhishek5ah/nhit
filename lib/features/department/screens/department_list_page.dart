@@ -142,7 +142,7 @@ class _DepartmentTableState extends State<DepartmentTable> {
           ),
         ),
 
-        // Controls: Show entries and Search
+        //  Search bar
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(

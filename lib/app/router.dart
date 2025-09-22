@@ -25,7 +25,7 @@ import 'package:nhit_frontend/features/vendors/screens/vendor_list_page.dart';
 import '../features/vendors/data/vendor_list.dart';
 
 
-/// Placeholder page for routes not yet implemented
+/// Placeholder page for routes which is not completed
 class PlaceholderPage extends StatelessWidget {
   final String title;
   const PlaceholderPage({super.key, required this.title});
@@ -39,7 +39,7 @@ class PlaceholderPage extends StatelessWidget {
 }
 
 final GoRouter router = GoRouter(
-  initialLocation: '/designation/list',
+  initialLocation: '/users',
   routes: [
     ShellRoute(
       builder: (context, state, child) => ValueListenableBuilder<ThemeMode>(
@@ -53,30 +53,12 @@ final GoRouter router = GoRouter(
           }
       ),
       routes: [
-        /// ---------------- ACTIVITY ----------------
-        GoRoute(
-          path: '/activity',
-          builder: (context, state) =>
-          const PlaceholderPage(title: 'Activity Pages'),
-          routes: [
-            GoRoute(
-              path: 'logs',
-              builder: (context, state) =>
-                  ActivityLogTable(activityLogs: activityLogs)
-            ),
-            GoRoute(
-              path: 'login-history',
-              builder: (context, state) =>
-                  UserLoginHistoryTable(loginHistoryData: userLoginHistoryData)
-            ),
-          ],
-        ),
 
         /// ---------------- ROLES ----------------
         GoRoute(
           path: '/roles',
           builder: (context, state) =>
-          const PlaceholderPage(title: 'Roles Home'),
+              RoleListTable(roleData: roleData),
           routes: [
             GoRoute(
               path: 'add',
@@ -96,7 +78,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/users',
           builder: (context, state) =>
-          const PlaceholderPage(title: 'Users Home'),
+              UserListTable(userData: userData),
           routes: [
             GoRoute(
               path: 'list',
@@ -115,7 +97,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/vendors',
           builder: (context, state) =>
-          const PlaceholderPage(title: 'Vendors Home'),
+              VendorListTable(vendorData: vendorData),
           routes: [
             GoRoute(
               path: 'list',
@@ -130,6 +112,26 @@ final GoRouter router = GoRouter(
 
           ],
         ),
+
+        /// ---------------- ACTIVITY ----------------
+        GoRoute(
+          path: '/activity',
+          builder: (context, state) =>
+              ActivityLogTable(activityLogs: activityLogs),
+          routes: [
+            GoRoute(
+                path: 'logs',
+                builder: (context, state) =>
+                    ActivityLogTable(activityLogs: activityLogs)
+            ),
+            GoRoute(
+                path: 'login-history',
+                builder: (context, state) =>
+                    UserLoginHistoryTable(loginHistoryData: userLoginHistoryData)
+            ),
+          ],
+        ),
+
 
         /// ---------------- EXPENSE APPROVAL ----------------
         // GoRoute(
@@ -159,7 +161,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/payment-notes',
           builder: (context, state) =>
-          const PlaceholderPage(title: 'Payment Notes Home'),
+              PaymentNotesTable(paymentNotes: paymentNoteData),
           routes: [
             GoRoute(
               path: 'list',
@@ -231,7 +233,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/designation',
           builder: (context, state) =>
-          const PlaceholderPage(title: 'Designation Home'),
+              DesignationTable(designationData: designationData),
           routes: [
             GoRoute(
               path: 'create',
@@ -250,7 +252,7 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/department',
           builder: (context, state) =>
-          const PlaceholderPage(title: 'Department Home'),
+              DepartmentTable(departmentData: departmentData),
           routes: [
             GoRoute(
               path: 'create',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nhit_frontend/common_widgets/view_modal.dart';
 import 'package:nhit_frontend/core/utils/role_status.dart';
 import 'package:nhit_frontend/features/roles/models/role_list_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
@@ -49,6 +50,42 @@ class _RoleListTableState extends State<RoleListTable> {
     });
   }
 
+  void onViewRole(Role role) {
+    DetailModal.show(
+      context,
+      title: 'Role Details',
+      contentWidgets: [
+        Text("Role Name: ${role.roleName}",),
+        Text("Role ID: ${role.id}",),
+        const Divider(height: 24),
+        Text("Assigned Permissions",),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: role.permissions.map((perm) {
+            final colors = getPermissionColors(perm, context);
+            return Badge(
+              backgroundColor: colors.background,
+              label: Text(
+                perm,
+                style: TextStyle(
+                  color: colors.text,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+
+
+  //delete modal
   void onDeleteRole(Role role) {
     showDialog(
       context: context,
@@ -251,8 +288,7 @@ class _RoleListTableState extends State<RoleListTable> {
                           Expanded(
                             child: IconButton(
                               icon: Icon(Icons.remove_red_eye, color: Theme.of(context).colorScheme.primary),
-                              onPressed: () {},
-                            ),
+                              onPressed: () => onViewRole(role),                            ),
                           ),
                           Expanded(
                             child: IconButton(

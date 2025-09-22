@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:nhit_frontend/common_widgets/edit_modal.dart';
 import 'package:nhit_frontend/core/utils/role_status.dart';
 import 'package:nhit_frontend/features/users/models/user_list_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
 import 'package:nhit_frontend/features/users/screens/add_user_page.dart';
+import 'package:nhit_frontend/common_widgets/view_modal.dart';
 
 class UserListTable extends StatefulWidget {
   final List<User> userData;
@@ -18,6 +20,16 @@ class _UserListTableState extends State<UserListTable> {
   String searchQuery = '';
   int rowsPerPage = 10;
   int currentPage = 0;
+
+  late TextEditingController nameController;
+  late TextEditingController usernameController;
+  late TextEditingController emailController;
+  late List<String> selectedRoles;
+  late bool isActive;
+  late GlobalKey<FormState> formKey;
+
+  // Available roles for selection
+  final List<String> availableRoles = ['Admin', 'User', 'Manager', 'Editor', 'Viewer'];
 
   @override
   void initState() {
@@ -36,7 +48,7 @@ class _UserListTableState extends State<UserListTable> {
             username.contains(searchQuery) ||
             email.contains(searchQuery);
       }).toList();
-      currentPage = 0; //pagination current page is reset when we search
+      currentPage = 0;
     });
   }
 
@@ -53,15 +65,135 @@ class _UserListTableState extends State<UserListTable> {
     });
   }
 
+  //edit modal section
   void onEditUser(User user) {
-    // here we implement user edit dialog
+    formKey = GlobalKey<FormState>();
+    nameController = TextEditingController(text: user.name);
+    usernameController = TextEditingController(text: user.username);
+    emailController = TextEditingController(text: user.email);
+    selectedRoles = List.from(user.roles);
+    isActive = user.isActive;
+
+    Future<void> disposeControllers() async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      nameController.dispose();
+      usernameController.dispose();
+      emailController.dispose();
+    }
+
+    EditModal.show(
+      context,
+      title: "Edit User",
+      formContent: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: "Name"),
+              validator: (val) => val == null || val.isEmpty ? "Enter name" : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: usernameController,
+              decoration: const InputDecoration(labelText: "Username"),
+              validator: (val) => val == null || val.isEmpty ? "Enter username" : null,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: emailController,
+              decoration: const InputDecoration(labelText: "Email"),
+              validator: (val) =>
+              val == null || !val.contains("@") ? "Enter valid email" : null,
+            ),
+            const SizedBox(height: 16),
+
+            // Roles Selection
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Roles", style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: availableRoles.map((role) {
+                    final isSelected = selectedRoles.contains(role);
+                    return FilterChip(
+                      label: Text(role),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            if (!selectedRoles.contains(role)) {
+                              selectedRoles.add(role);
+                            }
+                          } else {
+                            selectedRoles.remove(role);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Active Status
+            Row(
+              children: [
+                Text("Active Status: ", style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(width: 8),
+                Switch(
+                  value: isActive,
+                  onChanged: (value) {
+                    setState(() {
+                      isActive = value;
+                    });
+                  },
+                ),
+                Text(isActive ? "Active" : "Inactive"),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ).then((result) {
+      if (result == true) {
+        setState(() {
+          final index = widget.userData.indexWhere((u) => u.id == user.id);
+          if (index != -1) {
+            widget.userData[index] = user.copyWith(
+              name: nameController.text,
+              username: usernameController.text,
+              email: emailController.text,
+              roles: selectedRoles,
+              isActive: isActive,
+            );
+            filteredUsers = widget.userData;
+          }
+        });
+      }
+      disposeControllers();
+    });
   }
 
   void onViewUser(User user) {
-    // here also we implement user view detail
+    DetailModal.show(
+      context,
+      title: "User Details",
+      contentWidgets: [
+        Text("Name: ${user.name}"),
+        Text("Username: ${user.username}"),
+        Text("Email: ${user.email}"),
+        Text("Roles: ${user.roles.join(', ')}"),
+        Text("Status: ${user.isActive ? 'Active' : 'Inactive'}"),
+      ],
+    );
   }
 
-  //delete the user form the list
   void onDeleteUser(User user) {
     showDialog(
       context: context,
@@ -77,13 +209,10 @@ class _UserListTableState extends State<UserListTable> {
             onPressed: () {
               Navigator.of(context).pop();
               setState(() {
-                // remove user from the original list and filtered list
                 widget.userData.removeWhere((u) => u.id == user.id);
                 filteredUsers.removeWhere((u) => u.id == user.id);
-
-                // adjust currentPage
                 int totalPages = (filteredUsers.length / rowsPerPage).ceil();
-                if(currentPage >= totalPages && currentPage > 0) {
+                if (currentPage >= totalPages && currentPage > 0) {
                   currentPage = totalPages - 1;
                 }
               });
@@ -95,7 +224,6 @@ class _UserListTableState extends State<UserListTable> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     int totalPages = (filteredUsers.length / rowsPerPage).ceil();
@@ -103,7 +231,6 @@ class _UserListTableState extends State<UserListTable> {
     int end = (start + rowsPerPage).clamp(0, filteredUsers.length);
     final paginatedUsers = filteredUsers.sublist(start, end);
 
-    // --- Sliding window calculation for pagination buttons ---
     int windowSize = 10;
     int startWindow = 0;
     int endWindow = totalPages;
@@ -124,7 +251,6 @@ class _UserListTableState extends State<UserListTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title and "Add New" Button
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -143,7 +269,8 @@ class _UserListTableState extends State<UserListTable> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
@@ -152,8 +279,6 @@ class _UserListTableState extends State<UserListTable> {
             ],
           ),
         ),
-
-        // Top controls: Show entries and Search
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -163,12 +288,12 @@ class _UserListTableState extends State<UserListTable> {
                 const SizedBox(width: 8),
                 DropdownButton<int>(
                   value: rowsPerPage,
-                  items: [5, 10, 20, 50].map((count) {
-                    return DropdownMenuItem<int>(
-                      value: count,
-                      child: Text('$count'),
-                    );
-                  }).toList(),
+                  items: [5, 10, 20, 50]
+                      .map((count) => DropdownMenuItem<int>(
+                    value: count,
+                    child: Text('$count'),
+                  ))
+                      .toList(),
                   onChanged: changeRowsPerPage,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -180,7 +305,8 @@ class _UserListTableState extends State<UserListTable> {
               width: 210,
               child: TextField(
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  contentPadding:
+                  const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                   hintText: 'Search users',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
@@ -197,10 +323,7 @@ class _UserListTableState extends State<UserListTable> {
             ),
           ],
         ),
-
         const SizedBox(height: 12),
-
-        // Table content
         Expanded(
           child: CustomTable(
             minTableWidth: 1100,
@@ -208,13 +331,17 @@ class _UserListTableState extends State<UserListTable> {
               DataColumn(
                 label: SizedBox(
                   width: 50,
-                  child: Text('ID', overflow: TextOverflow.ellipsis, softWrap: false),
+                  child:
+                  Text('ID', overflow: TextOverflow.ellipsis, softWrap: false),
                 ),
               ),
               DataColumn(
                 label: SizedBox(
                   width: 160,
-                  child: Text('Name', overflow: TextOverflow.ellipsis, softWrap: false,
+                  child: Text(
+                    'Name',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
@@ -228,114 +355,126 @@ class _UserListTableState extends State<UserListTable> {
             rows: paginatedUsers.map((user) {
               return DataRow(
                 cells: [
-                  DataCell(SizedBox(
-                    width: 50,
-                    child: Text(
-                      user.id.toString(),
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  )),
-                  DataCell(SizedBox(
-                    width: 160,
-                    child: Text(
-                      user.name,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                    ),
-                  )),
-                  DataCell(Text(
-                    user.username,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                  )),
-                  DataCell(Text(
-                    user.email,
-                    overflow: TextOverflow.ellipsis,
-                    softWrap: false,
-                  )),
-                  DataCell(Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: user.roles.map((role) {
-                        final colors = getPermissionColors(role, context);
-                        return Badge(
-                          backgroundColor: colors.background,
-                          label: Text(
-                            role,
-                            style: TextStyle(
-                              color: colors.text,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 5,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  )),
-                  DataCell(Container(
-                    decoration: BoxDecoration(
-                      color: user.isActive ? Colors.green : Colors.red,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    child: Text(
-                      user.isActive ? 'Active' : 'Inactive',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                  DataCell(
+                    SizedBox(
+                      width: 50,
+                      child: Text(
+                        user.id.toString(),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
                       ),
                     ),
-                  )),
-                  DataCell(SizedBox(
-                    width: 110,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.edit,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            onPressed: () => onEditUser(user),
-                          ),
-                        ),
-                        Expanded(
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.remove_red_eye,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            onPressed: () => onViewUser(user),
-                          ),
-                        ),
-                        Expanded(
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.delete,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                            onPressed: () => onDeleteUser(user),
-                          ),
-                        ),
-                      ],
+                  ),
+                  DataCell(
+                    SizedBox(
+                      width: 160,
+                      child: Text(
+                        user.name,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
                     ),
-                  )),
+                  ),
+                  DataCell(
+                    Text(
+                      user.username,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      user.email,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                    ),
+                  ),
+                  DataCell(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: user.roles.map((role) {
+                          final colors = getPermissionColors(role, context);
+                          return Badge(
+                            backgroundColor: colors.background,
+                            label: Text(
+                              role,
+                              style: TextStyle(
+                                color: colors.text,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 5,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Container(
+                      decoration: BoxDecoration(
+                        color: user.isActive ? Colors.green : Colors.red,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      child: Text(
+                        user.isActive ? 'Active' : 'Inactive',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    SizedBox(
+                      width: 110,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.edit,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              onPressed: () => onEditUser(user),
+                            ),
+                          ),
+                          Expanded(
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.remove_red_eye,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              onPressed: () => onViewUser(user),
+                            ),
+                          ),
+                          Expanded(
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.delete,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              onPressed: () => onDeleteUser(user),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               );
             }).toList(),
           ),
         ),
-
-        // Pagination controls bottom
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -347,12 +486,10 @@ class _UserListTableState extends State<UserListTable> {
               ),
               Row(
                 children: [
-                  // Previous
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
                   ),
-                  // ----- Sliding window for page numbers -----
                   for (int i = startWindow; i < endWindow; i++)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -364,17 +501,19 @@ class _UserListTableState extends State<UserListTable> {
                           foregroundColor: i == currentPage
                               ? Colors.white
                               : Theme.of(context).colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text("${i + 1}"),
                         onPressed: () => gotoPage(i),
                       ),
                     ),
-                  // Next
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                    onPressed: currentPage < totalPages - 1
+                        ? () => gotoPage(currentPage + 1)
+                        : null,
                   ),
                 ],
               ),
