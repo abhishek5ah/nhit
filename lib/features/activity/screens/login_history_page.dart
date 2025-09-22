@@ -78,6 +78,15 @@ class _UserLoginHistoryTableState extends State<UserLoginHistoryTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Add heading here
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            "User Login History",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+
         // Top controls: Show entries and Search
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -107,7 +116,8 @@ class _UserLoginHistoryTableState extends State<UserLoginHistoryTable> {
                 width: 210,
                 child: TextField(
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    contentPadding:
+                    const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                     hintText: 'Search login history',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
@@ -142,7 +152,10 @@ class _UserLoginHistoryTableState extends State<UserLoginHistoryTable> {
               DataColumn(
                 label: SizedBox(
                   width: 160,
-                  child: Text('User', overflow: TextOverflow.ellipsis, softWrap: false, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: Text('User',
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
               DataColumn(label: Text('Login At')),
@@ -153,12 +166,24 @@ class _UserLoginHistoryTableState extends State<UserLoginHistoryTable> {
             rows: paginatedLoginHistory.map((entry) {
               return DataRow(
                 cells: [
-                  DataCell(SizedBox(width: 50, child: Text(entry.id.toString(), overflow: TextOverflow.ellipsis, softWrap: false))),
-                  DataCell(SizedBox(width: 160, child: Text(entry.user, overflow: TextOverflow.ellipsis, softWrap: false))),
-                  DataCell(Text(entry.loginAt, overflow: TextOverflow.ellipsis, softWrap: false)),
-                  DataCell(Text(entry.loginIp, overflow: TextOverflow.ellipsis, softWrap: false)),
-                  DataCell(SizedBox(width: 280, child: Text(entry.userAgent, overflow: TextOverflow.ellipsis, softWrap: false))),
-                  DataCell(Text(entry.createdAt, overflow: TextOverflow.ellipsis, softWrap: false)),
+                  DataCell(SizedBox(
+                      width: 50,
+                      child: Text(entry.id.toString(),
+                          overflow: TextOverflow.ellipsis, softWrap: false))),
+                  DataCell(SizedBox(
+                      width: 160,
+                      child: Text(entry.user,
+                          overflow: TextOverflow.ellipsis, softWrap: false))),
+                  DataCell(Text(entry.loginAt,
+                      overflow: TextOverflow.ellipsis, softWrap: false)),
+                  DataCell(Text(entry.loginIp,
+                      overflow: TextOverflow.ellipsis, softWrap: false)),
+                  DataCell(SizedBox(
+                      width: 280,
+                      child: Text(entry.userAgent,
+                          overflow: TextOverflow.ellipsis, softWrap: false))),
+                  DataCell(Text(entry.createdAt,
+                      overflow: TextOverflow.ellipsis, softWrap: false)),
                 ],
               );
             }).toList(),
@@ -192,7 +217,8 @@ class _UserLoginHistoryTableState extends State<UserLoginHistoryTable> {
                           foregroundColor: i == currentPage
                               ? Colors.white
                               : Theme.of(context).colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text("${i + 1}"),
@@ -201,7 +227,8 @@ class _UserLoginHistoryTableState extends State<UserLoginHistoryTable> {
                     ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                    onPressed:
+                    currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
                   ),
                 ],
               ),

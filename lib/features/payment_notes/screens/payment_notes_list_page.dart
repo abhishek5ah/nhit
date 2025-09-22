@@ -128,7 +128,6 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     int totalPages = (filteredNotes.length / rowsPerPage).ceil();
     int start = currentPage * rowsPerPage;
@@ -174,7 +173,6 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
           ),
         ),
 
-        // The rest of your widget (search controls, table, pagination) unchanged...
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -303,7 +301,7 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
           ),
         ),
 
-        // Pagination controls bottom (unchanged)
+        // Pagination controls bottom
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(

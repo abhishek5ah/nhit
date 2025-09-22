@@ -152,7 +152,6 @@ class AddUserPage extends StatelessWidget {
         title: 'Add User',
         fields: addUserFields,
         onSubmit: (values) {
-
           // Show success  notification at bottom
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

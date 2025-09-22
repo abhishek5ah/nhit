@@ -76,6 +76,18 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Add heading here
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            "Activity Logs",
+            style: Theme
+                .of(context)
+                .textTheme
+                .titleLarge,
+          ),
+        ),
+
         // Top controls: Show entries and Search
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -84,7 +96,10 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
             children: [
               Row(
                 children: [
-                  Text("Show", style: Theme.of(context).textTheme.bodyLarge),
+                  Text("Show", style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyLarge),
                   const SizedBox(width: 8),
                   DropdownButton<int>(
                     value: rowsPerPage,
@@ -95,23 +110,35 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
                       );
                     }).toList(),
                     onChanged: changeRowsPerPage,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .bodyLarge,
                   ),
                   const SizedBox(width: 8),
-                  Text("entries", style: Theme.of(context).textTheme.bodyLarge),
+                  Text("entries", style: Theme
+                      .of(context)
+                      .textTheme
+                      .bodyLarge),
                 ],
               ),
               SizedBox(
                 width: 210,
                 child: TextField(
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 12,
+                    ),
                     hintText: 'Search activity logs',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.outline,
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .outline,
                         width: 0.25,
                       ),
                     ),
@@ -132,28 +159,73 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
             minTableWidth: 1100,
             columns: const [
               DataColumn(
-                label: SizedBox(width: 50, child: Text('ID', overflow: TextOverflow.ellipsis, softWrap: false)),
+                label: SizedBox(
+                  width: 50,
+                  child: Text(
+                    'ID',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                ),
               ),
               DataColumn(
-                label: SizedBox(width: 320, child: Text('Name', overflow: TextOverflow.ellipsis, softWrap: false, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                label: SizedBox(
+                  width: 320,
+                  child: Text(
+                    'Name',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
               ),
-              DataColumn(label: SizedBox(width: 220, child: Text('Description'))),
+              DataColumn(
+                label: SizedBox(width: 220, child: Text('Description')),
+              ),
               DataColumn(label: SizedBox(width: 120, child: Text('Time Ago'))),
             ],
             rows: paginatedLogs.map((log) {
               return DataRow(
                 cells: [
                   DataCell(
-                    SizedBox(width: 50, child: Text(log.id.toString(), overflow: TextOverflow.ellipsis, softWrap: false)),
+                    SizedBox(
+                      width: 50,
+                      child: Text(
+                        log.id.toString(),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ),
                   ),
                   DataCell(
-                    SizedBox(width: 320, child: Text(log.name, overflow: TextOverflow.ellipsis, softWrap: false)),
+                    SizedBox(
+                      width: 320,
+                      child: Text(
+                        log.name,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ),
                   ),
                   DataCell(
-                    SizedBox(width: 220, child: Text(log.description, overflow: TextOverflow.ellipsis, softWrap: false)),
+                    SizedBox(
+                      width: 220,
+                      child: Text(
+                        log.description,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ),
                   ),
                   DataCell(
-                    SizedBox(width: 120, child: Text(log.timeAgo, overflow: TextOverflow.ellipsis, softWrap: false)),
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        log.timeAgo,
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                      ),
+                    ),
                   ),
                 ],
               );
@@ -168,14 +240,19 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Showing ${filteredLogs.isEmpty ? 0 : start + 1} to $end of ${filteredLogs.length} entries",
-                style: Theme.of(context).textTheme.bodySmall,
+                "Showing ${filteredLogs.isEmpty ? 0 : start +
+                    1} to $end of ${filteredLogs.length} entries",
+                style: Theme
+                    .of(context)
+                    .textTheme
+                    .bodySmall,
               ),
               Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
+                    onPressed:
+                    currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
                   ),
                   for (int i = startWindow; i < endWindow; i++)
                     Padding(
@@ -183,12 +260,24 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: i == currentPage
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surfaceContainerLow,
+                              ? Theme
+                              .of(context)
+                              .colorScheme
+                              .primary
+                              : Theme
+                              .of(context)
+                              .colorScheme
+                              .surfaceContainerLow,
                           foregroundColor: i == currentPage
                               ? Colors.white
-                              : Theme.of(context).colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              : Theme
+                              .of(context)
+                              .colorScheme
+                              .onSurface,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text("${i + 1}"),
@@ -197,7 +286,9 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
                     ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                    onPressed: currentPage < totalPages - 1
+                        ? () => gotoPage(currentPage + 1)
+                        : null,
                   ),
                 ],
               ),
