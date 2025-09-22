@@ -8,4 +8,15 @@ class Department {
     required this.name,
     required this.description,
   });
+
+  Department copyWith({
+    String? name,
+    String? description,
+  }) {
+    return Department(
+      id: id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+    );
+  }
 }

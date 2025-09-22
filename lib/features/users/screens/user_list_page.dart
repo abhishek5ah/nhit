@@ -29,7 +29,13 @@ class _UserListTableState extends State<UserListTable> {
   late GlobalKey<FormState> formKey;
 
   // Available roles for selection
-  final List<String> availableRoles = ['Admin', 'User', 'Manager', 'Editor', 'Viewer'];
+  final List<String> availableRoles = [
+    'Admin',
+    'User',
+    'Manager',
+    'Editor',
+    'Viewer',
+  ];
 
   @override
   void initState() {
@@ -84,81 +90,94 @@ class _UserListTableState extends State<UserListTable> {
     EditModal.show(
       context,
       title: "Edit User",
-      formContent: Form(
-        key: formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: "Name"),
-              validator: (val) => val == null || val.isEmpty ? "Enter name" : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: usernameController,
-              decoration: const InputDecoration(labelText: "Username"),
-              validator: (val) => val == null || val.isEmpty ? "Enter username" : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
-              validator: (val) =>
-              val == null || !val.contains("@") ? "Enter valid email" : null,
-            ),
-            const SizedBox(height: 16),
-
-            // Roles Selection
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      formContent: StatefulBuilder(
+        builder: (context, setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Roles", style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: availableRoles.map((role) {
-                    final isSelected = selectedRoles.contains(role);
-                    return FilterChip(
-                      label: Text(role),
-                      selected: isSelected,
-                      onSelected: (selected) {
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Name"),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? "Enter name" : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: usernameController,
+                  decoration: const InputDecoration(labelText: "Username"),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? "Enter username" : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: "Email"),
+                  validator: (val) => val == null || !val.contains("@")
+                      ? "Enter valid email"
+                      : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Roles Selection with local setState
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Roles",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      children: availableRoles.map((role) {
+                        final isSelected = selectedRoles.contains(role);
+                        return FilterChip(
+                          label: Text(role),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                if (!selectedRoles.contains(role)) {
+                                  selectedRoles.add(role);
+                                }
+                              } else {
+                                selectedRoles.remove(role);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // Active Status with local setState
+                Row(
+                  children: [
+                    Text(
+                      "Active Status: ",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(width: 8),
+                    Switch(
+                      value: isActive,
+                      onChanged: (value) {
                         setState(() {
-                          if (selected) {
-                            if (!selectedRoles.contains(role)) {
-                              selectedRoles.add(role);
-                            }
-                          } else {
-                            selectedRoles.remove(role);
-                          }
+                          isActive = value;
                         });
                       },
-                    );
-                  }).toList(),
+                    ),
+                    Text(isActive ? "Active" : "Inactive"),
+                  ],
                 ),
               ],
             ),
-
-            const SizedBox(height: 16),
-
-            // Active Status
-            Row(
-              children: [
-                Text("Active Status: ", style: Theme.of(context).textTheme.bodyMedium),
-                const SizedBox(width: 8),
-                Switch(
-                  value: isActive,
-                  onChanged: (value) {
-                    setState(() {
-                      isActive = value;
-                    });
-                  },
-                ),
-                Text(isActive ? "Active" : "Inactive"),
-              ],
-            ),
-          ],
-        ),
+          );
+        },
       ),
     ).then((result) {
       if (result == true) {
@@ -269,8 +288,10 @@ class _UserListTableState extends State<UserListTable> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
@@ -289,10 +310,12 @@ class _UserListTableState extends State<UserListTable> {
                 DropdownButton<int>(
                   value: rowsPerPage,
                   items: [5, 10, 20, 50]
-                      .map((count) => DropdownMenuItem<int>(
-                    value: count,
-                    child: Text('$count'),
-                  ))
+                      .map(
+                        (count) => DropdownMenuItem<int>(
+                          value: count,
+                          child: Text('$count'),
+                        ),
+                      )
                       .toList(),
                   onChanged: changeRowsPerPage,
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -305,8 +328,10 @@ class _UserListTableState extends State<UserListTable> {
               width: 210,
               child: TextField(
                 decoration: InputDecoration(
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 12,
+                  ),
                   hintText: 'Search users',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
@@ -331,8 +356,11 @@ class _UserListTableState extends State<UserListTable> {
               DataColumn(
                 label: SizedBox(
                   width: 50,
-                  child:
-                  Text('ID', overflow: TextOverflow.ellipsis, softWrap: false),
+                  child: Text(
+                    'ID',
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
                 ),
               ),
               DataColumn(
@@ -423,7 +451,10 @@ class _UserListTableState extends State<UserListTable> {
                         color: user.isActive ? Colors.green : Colors.red,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       child: Text(
                         user.isActive ? 'Active' : 'Inactive',
                         style: const TextStyle(
@@ -488,7 +519,9 @@ class _UserListTableState extends State<UserListTable> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
+                    onPressed: currentPage > 0
+                        ? () => gotoPage(currentPage - 1)
+                        : null,
                   ),
                   for (int i = startWindow; i < endWindow; i++)
                     Padding(
@@ -497,12 +530,16 @@ class _UserListTableState extends State<UserListTable> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: i == currentPage
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surfaceContainerLow,
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow,
                           foregroundColor: i == currentPage
                               ? Colors.white
                               : Theme.of(context).colorScheme.onSurface,
-                          padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text("${i + 1}"),

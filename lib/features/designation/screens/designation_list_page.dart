@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nhit_frontend/features/designation/model/designation_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
-import 'package:nhit_frontend/common_widgets/primary_button.dart';
-import 'package:nhit_frontend/common_widgets/secondary_button.dart';
+import 'package:nhit_frontend/common_widgets/edit_modal.dart';
 
 class DesignationTable extends StatefulWidget {
   final List<Designation> designationData;
@@ -18,6 +17,10 @@ class _DesignationTableState extends State<DesignationTable> {
   String searchQuery = '';
   int rowsPerPage = 10;
   int currentPage = 0;
+
+  late TextEditingController nameController;
+  late TextEditingController descriptionController;
+  late GlobalKey<FormState> formKey;
 
   @override
   void initState() {
@@ -80,22 +83,82 @@ class _DesignationTableState extends State<DesignationTable> {
     );
   }
 
-  Widget buildActionButtons(Designation designation) {
+  void onEditDesignation(Designation designation) {
+    formKey = GlobalKey<FormState>();
+    nameController = TextEditingController(text: designation.name);
+    descriptionController = TextEditingController(text: designation.description);
+
+    Future<void> disposeControllers() async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      nameController.dispose();
+      descriptionController.dispose();
+    }
+
+    EditModal.show(
+      context,
+      title: "Edit Designation",
+      formContent: StatefulBuilder(
+        builder: (context, setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Name"),
+                  validator: (val) => val == null || val.isEmpty ? "Enter name" : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: "Description"),
+                  validator: (val) => val == null || val.isEmpty ? "Enter description" : null,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ).then((result) {
+      if (result == true) {
+        if (formKey.currentState?.validate() == true) {
+          setState(() {
+            final index = widget.designationData.indexWhere((d) => d.id == designation.id);
+            if (index != -1) {
+              widget.designationData[index] = designation.copyWith(
+                name: nameController.text,
+                description: descriptionController.text,
+              );
+              filteredDesignations = widget.designationData;
+            }
+          });
+        }
+      }
+      disposeControllers();
+    });
+  }
+
+  Widget buildActionIcons(Designation designation) {
     return Row(
       children: [
-        PrimaryButton(
-          label: "Edit",
-          icon: Icons.edit,
-          onPressed: () {
-            // TODO: Implement edit action
-          },
+        IconButton(
+          icon: Icon(
+            Icons.edit,
+            color: Theme.of(context).colorScheme.primary,
+            size: 20,
+          ),
+          onPressed: () => onEditDesignation(designation),
+          tooltip: "Edit",
         ),
-        const SizedBox(width: 8),
-        SecondaryButton(
-          label: "Delete",
-          icon: Icons.delete,
-          backgroundColor: Colors.red,
+        IconButton(
+          icon: Icon(
+            Icons.delete,
+            color: Theme.of(context).colorScheme.error,
+            size: 20,
+          ),
           onPressed: () => onDeleteDesignation(designation),
+          tooltip: "Delete",
         ),
       ],
     );
@@ -128,7 +191,6 @@ class _DesignationTableState extends State<DesignationTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title and "Add New" Button
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -142,7 +204,6 @@ class _DesignationTableState extends State<DesignationTable> {
           ),
         ),
 
-        // Controls: Show entries and Search
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
@@ -190,7 +251,6 @@ class _DesignationTableState extends State<DesignationTable> {
           ),
         ),
 
-        // Table content
         Expanded(
           child: CustomTable(
             minTableWidth: 700,
@@ -206,14 +266,13 @@ class _DesignationTableState extends State<DesignationTable> {
                   DataCell(Text(designation.id.toString())),
                   DataCell(Text(designation.name)),
                   DataCell(Text(designation.description)),
-                  DataCell(buildActionButtons(designation)),
+                  DataCell(buildActionIcons(designation)),
                 ],
               );
             }).toList(),
           ),
         ),
 
-        // Pagination controls bottom
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nhit_frontend/features/payment_notes/model/approval_rule_modal.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
+import 'package:nhit_frontend/common_widgets/edit_modal.dart';
 
 class ApprovalRulesTable extends StatefulWidget {
   final List<ApprovalRule> approvalRuleData;
@@ -16,6 +17,11 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
   String searchQuery = '';
   int rowsPerPage = 10;
   int currentPage = 0;
+
+  late TextEditingController approverLevelController;
+  late TextEditingController usersController;
+  late TextEditingController paymentRangeController;
+  late GlobalKey<FormState> formKey;
 
   @override
   void initState() {
@@ -78,6 +84,71 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
     );
   }
 
+  void onEditRule(ApprovalRule rule) {
+    formKey = GlobalKey<FormState>();
+    approverLevelController = TextEditingController(text: rule.approverLevel);
+    usersController = TextEditingController(text: rule.users);
+    paymentRangeController = TextEditingController(text: rule.paymentRange);
+
+    Future<void> disposeControllers() async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      approverLevelController.dispose();
+      usersController.dispose();
+      paymentRangeController.dispose();
+    }
+
+    EditModal.show(
+      context,
+      title: "Edit Approval Rule",
+      formContent: StatefulBuilder(
+        builder: (context, setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: approverLevelController,
+                  decoration: const InputDecoration(labelText: "Approver Level"),
+                  validator: (val) => val == null || val.isEmpty ? "Enter approver level" : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: usersController,
+                  decoration: const InputDecoration(labelText: "Users"),
+                  validator: (val) => val == null || val.isEmpty ? "Enter users" : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: paymentRangeController,
+                  decoration: const InputDecoration(labelText: "Payment Range"),
+                  validator: (val) => val == null || val.isEmpty ? "Enter payment range" : null,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ).then((result) {
+      if (result == true) {
+        if (formKey.currentState?.validate() == true) {
+          setState(() {
+            final index = widget.approvalRuleData.indexOf(rule);
+            if (index != -1) {
+              widget.approvalRuleData[index] = rule.copyWith(
+                approverLevel: approverLevelController.text,
+                users: usersController.text,
+                paymentRange: paymentRangeController.text,
+              );
+              filteredRules = widget.approvalRuleData;
+            }
+          });
+        }
+      }
+      disposeControllers();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     int totalPages = (filteredRules.length / rowsPerPage).ceil();
@@ -105,7 +176,6 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title and "Add New" Button
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -119,7 +189,6 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
           ),
         ),
 
-        // Top controls: Show entries & Search
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -168,7 +237,6 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
 
         const SizedBox(height: 12),
 
-        // Table content using CustomTable
         Expanded(
           child: CustomTable(
             minTableWidth: 800,
@@ -187,9 +255,7 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        // TODO: implement edit functionality
-                      },
+                      onPressed: () => onEditRule(rule),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
@@ -202,7 +268,6 @@ class _ApprovalRulesTableState extends State<ApprovalRulesTable> {
           ),
         ),
 
-        // Pagination controls bottom
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(

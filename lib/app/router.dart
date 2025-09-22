@@ -39,7 +39,7 @@ class PlaceholderPage extends StatelessWidget {
 }
 
 final GoRouter router = GoRouter(
-  initialLocation: '/users',
+  initialLocation: '/designation',
   routes: [
     ShellRoute(
       builder: (context, state, child) => ValueListenableBuilder<ThemeMode>(

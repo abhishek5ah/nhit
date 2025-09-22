@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // Global ValueNotifier to hold the current theme mode
-final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.dark);
+final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.light);
 
 // Function to toggle theme mode between light and dark
 void toggleTheme() {

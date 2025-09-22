@@ -16,4 +16,23 @@ class Vendor {
     required this.beneficiaryName,
     required this.status,
   });
+
+  Vendor copyWith({
+    String? code,
+    String? name,
+    String? email,
+    String? mobile,
+    String? beneficiaryName,
+    String? status,
+  }) {
+    return Vendor(
+      id: id,
+      code: code ?? this.code,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      mobile: mobile ?? this.mobile,
+      beneficiaryName: beneficiaryName ?? this.beneficiaryName,
+      status: status ?? this.status,
+    );
+  }
 }

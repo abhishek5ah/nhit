@@ -1,3 +1,4 @@
+
 class Role {
   final int id;
   final String roleName;
@@ -8,4 +9,15 @@ class Role {
     required this.roleName,
     required this.permissions,
   });
+
+  Role copyWith({
+    String? roleName,
+    List<String>? permissions,
+  }) {
+    return Role(
+      id: id,
+      roleName: roleName ?? this.roleName,
+      permissions: permissions ?? this.permissions,
+    );
+  }
 }

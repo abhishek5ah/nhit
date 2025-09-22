@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nhit_frontend/features/department/model/department_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
-import 'package:nhit_frontend/common_widgets/primary_button.dart';
-import 'package:nhit_frontend/common_widgets/secondary_button.dart';
+import 'package:nhit_frontend/common_widgets/edit_modal.dart';
 
 class DepartmentTable extends StatefulWidget {
   final List<Department> departmentData;
@@ -18,6 +17,10 @@ class _DepartmentTableState extends State<DepartmentTable> {
   String searchQuery = '';
   int rowsPerPage = 10;
   int currentPage = 0;
+
+  late TextEditingController nameController;
+  late TextEditingController descriptionController;
+  late GlobalKey<FormState> formKey;
 
   @override
   void initState() {
@@ -67,7 +70,8 @@ class _DepartmentTableState extends State<DepartmentTable> {
               setState(() {
                 widget.departmentData.removeWhere((d) => d.id == department.id);
                 filteredDepartments.removeWhere((d) => d.id == department.id);
-                int totalPages = (filteredDepartments.length / rowsPerPage).ceil();
+                int totalPages = (filteredDepartments.length / rowsPerPage)
+                    .ceil();
                 if (currentPage >= totalPages && currentPage > 0) {
                   currentPage = totalPages - 1;
                 }
@@ -80,22 +84,86 @@ class _DepartmentTableState extends State<DepartmentTable> {
     );
   }
 
-  Widget buildActionButtons(Department department) {
+  void onEditDepartment(Department department) {
+    formKey = GlobalKey<FormState>();
+    nameController = TextEditingController(text: department.name);
+    descriptionController = TextEditingController(text: department.description);
+
+    Future<void> disposeControllers() async {
+      await Future.delayed(const Duration(milliseconds: 200));
+      nameController.dispose();
+      descriptionController.dispose();
+    }
+
+    EditModal.show(
+      context,
+      title: "Edit Department",
+      formContent: StatefulBuilder(
+        builder: (context, setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Name"),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? "Enter name" : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: "Description"),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? "Enter description" : null,
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ).then((result) {
+      if (result == true) {
+        if (formKey.currentState?.validate() == true) {
+          setState(() {
+            final index = widget.departmentData.indexWhere(
+              (d) => d.id == department.id,
+            );
+            if (index != -1) {
+              widget.departmentData[index] = department.copyWith(
+                name: nameController.text,
+                description: descriptionController.text,
+              );
+              filteredDepartments = widget.departmentData;
+            }
+          });
+        }
+      }
+      disposeControllers();
+    });
+  }
+
+  Widget buildActionIcons(Department department) {
     return Row(
       children: [
-        PrimaryButton(
-          label: "Edit",
-          icon: Icons.edit,
-          onPressed: () {
-            // TODO: Implement edit action
-          },
+        IconButton(
+          icon: Icon(
+            Icons.edit,
+            color: Theme.of(context).colorScheme.primary,
+            size: 20,
+          ),
+          onPressed: () => onEditDepartment(department),
+          tooltip: "Edit",
         ),
-        const SizedBox(width: 8),
-        SecondaryButton(
-          label: "Delete",
-          icon: Icons.delete,
-          backgroundColor: Colors.red,
+        IconButton(
+          icon: Icon(
+            Icons.delete,
+            color: Theme.of(context).colorScheme.error,
+            size: 20,
+          ),
           onPressed: () => onDeleteDepartment(department),
+          tooltip: "Delete",
         ),
       ],
     );
@@ -128,7 +196,6 @@ class _DepartmentTableState extends State<DepartmentTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title and "Add New" Button
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -142,7 +209,6 @@ class _DepartmentTableState extends State<DepartmentTable> {
           ),
         ),
 
-        //  Search bar
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Row(
@@ -171,7 +237,10 @@ class _DepartmentTableState extends State<DepartmentTable> {
                 width: 210,
                 child: TextField(
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 12,
+                    ),
                     hintText: 'Search departments',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
@@ -190,10 +259,9 @@ class _DepartmentTableState extends State<DepartmentTable> {
           ),
         ),
 
-        // Table content
         Expanded(
           child: CustomTable(
-            minTableWidth: 700,
+            minTableWidth: 500,
             columns: const [
               DataColumn(label: Text('#')),
               DataColumn(label: Text('Name')),
@@ -206,14 +274,13 @@ class _DepartmentTableState extends State<DepartmentTable> {
                   DataCell(Text(department.id.toString())),
                   DataCell(Text(department.name)),
                   DataCell(Text(department.description)),
-                  DataCell(buildActionButtons(department)),
+                  DataCell(buildActionIcons(department)),
                 ],
               );
             }).toList(),
           ),
         ),
 
-        // Pagination controls bottom
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -227,7 +294,9 @@ class _DepartmentTableState extends State<DepartmentTable> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
+                    onPressed: currentPage > 0
+                        ? () => gotoPage(currentPage - 1)
+                        : null,
                   ),
                   for (int i = startWindow; i < endWindow; i++)
                     Padding(
@@ -236,11 +305,16 @@ class _DepartmentTableState extends State<DepartmentTable> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: i == currentPage
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surfaceContainerLow,
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow,
                           foregroundColor: i == currentPage
                               ? Colors.white
                               : Theme.of(context).colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text("${i + 1}"),
@@ -249,7 +323,9 @@ class _DepartmentTableState extends State<DepartmentTable> {
                     ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                    onPressed: currentPage < totalPages - 1
+                        ? () => gotoPage(currentPage + 1)
+                        : null,
                   ),
                 ],
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nhit_frontend/common_widgets/edit_modal.dart';
 import 'package:nhit_frontend/common_widgets/view_modal.dart';
 import 'package:nhit_frontend/core/utils/role_status.dart';
 import 'package:nhit_frontend/features/roles/models/role_list_model.dart';
@@ -55,10 +56,10 @@ class _RoleListTableState extends State<RoleListTable> {
       context,
       title: 'Role Details',
       contentWidgets: [
-        Text("Role Name: ${role.roleName}",),
-        Text("Role ID: ${role.id}",),
+        Text("Role Name: ${role.roleName}"),
+        Text("Role ID: ${role.id}"),
         const Divider(height: 24),
-        Text("Assigned Permissions",),
+        Text("Assigned Permissions"),
         Wrap(
           spacing: 6,
           runSpacing: 6,
@@ -83,9 +84,84 @@ class _RoleListTableState extends State<RoleListTable> {
     );
   }
 
+  void onEditRole(Role role) {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String roleName = role.roleName;
+    List<String> selectedPermissions = List.from(role.permissions);
 
+    final List<String> availablePermissions = [
+      'view-payment',
+      'view-rule',
+      'edit-note',
+      'create-payment',
+      'delete-payment',
+      'all-note',
+      'view-vendors',
 
-  //delete modal
+      // here we can add more permissions
+    ];
+
+    EditModal.show(
+      context,
+      title: "Edit Role",
+      formContent: StatefulBuilder(
+        builder: (context, setState) {
+          return Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  initialValue: roleName,
+                  decoration: const InputDecoration(labelText: "Role Name"),
+                  validator: (val) =>
+                  val == null || val.isEmpty ? "Enter role name" : null,
+                  onChanged: (val) => roleName = val,
+                ),
+                const SizedBox(height: 16),
+                Text("Permissions", style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: availablePermissions.map((perm) {
+                    final isSelected = selectedPermissions.contains(perm);
+                    return FilterChip(
+                      label: Text(perm),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            selectedPermissions.add(perm);
+                          } else {
+                            selectedPermissions.remove(perm);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ).then((result) {
+      if (result == true) {
+        setState(() {
+          final index = widget.roleData.indexWhere((r) => r.id == role.id);
+          if (index != -1) {
+            widget.roleData[index] = role.copyWith(
+              roleName: roleName,
+              permissions: selectedPermissions,
+            );
+            filteredRoles = List.from(widget.roleData);
+          }
+        });
+      }
+    });
+  }
+
   void onDeleteRole(Role role) {
     showDialog(
       context: context,
@@ -150,12 +226,9 @@ class _RoleListTableState extends State<RoleListTable> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Manage Roles", style: Theme.of(context).textTheme.titleLarge),
-              // Optional: Add "Add New Role" button here if needed
             ],
           ),
         ),
-
-        // Controls: Show entries and Search
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -182,7 +255,8 @@ class _RoleListTableState extends State<RoleListTable> {
               width: 210,
               child: TextField(
                 decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  contentPadding:
+                  const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                   hintText: 'Search roles',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
@@ -199,9 +273,7 @@ class _RoleListTableState extends State<RoleListTable> {
             ),
           ],
         ),
-
         const SizedBox(height: 12),
-
         Expanded(
           child: CustomTable(
             minTableWidth: 1100,
@@ -209,7 +281,8 @@ class _RoleListTableState extends State<RoleListTable> {
               DataColumn(
                 label: SizedBox(
                   width: 50,
-                  child: Text('ID', overflow: TextOverflow.ellipsis, softWrap: false),
+                  child:
+                  Text('ID', overflow: TextOverflow.ellipsis, softWrap: false),
                 ),
               ),
               DataColumn(
@@ -268,7 +341,8 @@ class _RoleListTableState extends State<RoleListTable> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 5),
                           );
                         }).toList(),
                       ),
@@ -281,18 +355,22 @@ class _RoleListTableState extends State<RoleListTable> {
                         children: [
                           Expanded(
                             child: IconButton(
-                              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
-                              onPressed: () {},
+                              icon: Icon(Icons.edit,
+                                  color: Theme.of(context).colorScheme.primary),
+                              onPressed: () => onEditRole(role),
                             ),
                           ),
                           Expanded(
                             child: IconButton(
-                              icon: Icon(Icons.remove_red_eye, color: Theme.of(context).colorScheme.primary),
-                              onPressed: () => onViewRole(role),                            ),
+                              icon: Icon(Icons.remove_red_eye,
+                                  color: Theme.of(context).colorScheme.primary),
+                              onPressed: () => onViewRole(role),
+                            ),
                           ),
                           Expanded(
                             child: IconButton(
-                              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+                              icon: Icon(Icons.delete,
+                                  color: Theme.of(context).colorScheme.error),
                               onPressed: () => onDeleteRole(role),
                             ),
                           ),
@@ -305,7 +383,6 @@ class _RoleListTableState extends State<RoleListTable> {
             }).toList(),
           ),
         ),
-
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -332,7 +409,8 @@ class _RoleListTableState extends State<RoleListTable> {
                           foregroundColor: i == currentPage
                               ? Colors.white
                               : Theme.of(context).colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text("${i + 1}"),
@@ -341,7 +419,9 @@ class _RoleListTableState extends State<RoleListTable> {
                     ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                    onPressed: currentPage < totalPages - 1
+                        ? () => gotoPage(currentPage + 1)
+                        : null,
                   ),
                 ],
               ),
@@ -352,3 +432,5 @@ class _RoleListTableState extends State<RoleListTable> {
     );
   }
 }
+
+// Role model example with correct copyWith (for your model file)
