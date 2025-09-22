@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Common Breadcrumbs Widget
-/// Use inside AppBar or below it to show navigation path
 class Breadcrumbs extends StatelessWidget {
   final String? currentLocation;
   final TextStyle? textStyle;
@@ -110,7 +108,6 @@ class _Breadcrumb {
   _Breadcrumb({required this.title, required this.href});
 }
 
-/// ✅ Define all route labels based on NHIT folder structure
 const Map<String, String> routeLabels = {
   '/dashboard': 'Dashboard',
   '/roles': 'Roles',

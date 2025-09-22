@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:nhit_frontend/common_widgets/tabs.dart';
 import 'package:nhit_frontend/features/payment_notes/model/payment_note_model.dart';
 import 'package:nhit_frontend/common_widgets/custom_table.dart';
 import 'package:nhit_frontend/common_widgets/view_modal.dart';
-
 
 class PaymentNotesTable extends StatefulWidget {
   final List<PaymentNote> paymentNotes;
@@ -15,9 +15,14 @@ class PaymentNotesTable extends StatefulWidget {
 
 class _PaymentNotesTableState extends State<PaymentNotesTable> {
   late List<PaymentNote> filteredNotes;
+
   String searchQuery = '';
   int rowsPerPage = 10;
   int currentPage = 0;
+
+  // Tabs state
+  final List<String> tabs = ['All', 'Pending', 'Approved', 'Rejected', 'Draft'];
+  int selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -25,19 +30,37 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
     filteredNotes = widget.paymentNotes;
   }
 
-  void updateSearch(String query) {
+  void updateFilter() {
     setState(() {
-      searchQuery = query.toLowerCase();
+      String selectedStatus = tabs[selectedTabIndex].toLowerCase();
       filteredNotes = widget.paymentNotes.where((note) {
-        return note.projectName.toLowerCase().contains(searchQuery) ||
+        bool matchesSearch =
+            note.projectName.toLowerCase().contains(searchQuery) ||
             note.vendorName.toLowerCase().contains(searchQuery) ||
             note.invoiceValue.toLowerCase().contains(searchQuery) ||
             note.date.toLowerCase().contains(searchQuery) ||
             note.status.toLowerCase().contains(searchQuery) ||
             note.nextApprover.toLowerCase().contains(searchQuery);
+
+        bool matchesStatus =
+            selectedStatus == 'all' ||
+            note.status.toLowerCase() == selectedStatus;
+
+        return matchesSearch && matchesStatus;
       }).toList();
-      currentPage = 0; // Reset page when searching
+
+      currentPage = 0; // reset pagination on filter change
     });
+  }
+
+  void onSearchChanged(String query) {
+    searchQuery = query.toLowerCase();
+    updateFilter();
+  }
+
+  void onTabChanged(int index) {
+    selectedTabIndex = index;
+    updateFilter();
   }
 
   void changeRowsPerPage(int? value) {
@@ -53,31 +76,33 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
     });
   }
 
-  //view modal
   void onViewNoteDetails(PaymentNote note) {
     DetailModal.show(
       context,
       title: 'Payment Note Details',
       contentWidgets: [
-        Text("Serial No: ${note.sno}", style: Theme.of(context).textTheme.bodyLarge),
-        Text("Project Name: ${note.projectName}",),
-        Text("Vendor Name: ${note.vendorName}",),
-        Text("Invoice Value: ${note.invoiceValue}",),
-        Text("Date: ${note.date}",),
-        Text("Status: ${note.status}",),
-        Text("Next Approver: ${note.nextApprover}",),
+        Text(
+          "Serial No: ${note.sno}",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        Text("Project Name: ${note.projectName}"),
+        Text("Vendor Name: ${note.vendorName}"),
+        Text("Invoice Value: ${note.invoiceValue}"),
+        Text("Date: ${note.date}"),
+        Text("Status: ${note.status}"),
+        Text("Next Approver: ${note.nextApprover}"),
       ],
     );
   }
 
-
-  //delete modal
   void onDeleteNote(PaymentNote note) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to delete invoice no. ${note.sno}?'),
+        content: Text(
+          'Are you sure you want to delete invoice no. ${note.sno}?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -102,6 +127,7 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
     );
   }
 
+  @override
   @override
   Widget build(BuildContext context) {
     int totalPages = (filteredNotes.length / rowsPerPage).ceil();
@@ -129,22 +155,26 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title and "Add New" Button
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "All Payment Notes",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-
-            ],
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            "All Payment Notes",
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
 
-        // Top controls: Show entries and Search bar
+        // TabsBar
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: TabsBar(
+            tabs: tabs,
+            selectedIndex: selectedTabIndex,
+            onChanged: onTabChanged,
+            direction: Axis.horizontal,
+          ),
+        ),
+
+        // The rest of your widget (search controls, table, pagination) unchanged...
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
           child: Row(
@@ -156,12 +186,14 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                   const SizedBox(width: 8),
                   DropdownButton<int>(
                     value: rowsPerPage,
-                    items: [5, 10, 20, 50].map((count) {
-                      return DropdownMenuItem<int>(
-                        value: count,
-                        child: Text('$count'),
-                      );
-                    }).toList(),
+                    items: [5, 10, 20, 50]
+                        .map(
+                          (count) => DropdownMenuItem<int>(
+                            value: count,
+                            child: Text('$count'),
+                          ),
+                        )
+                        .toList(),
                     onChanged: changeRowsPerPage,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
@@ -173,7 +205,10 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                 width: 250,
                 child: TextField(
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 0,
+                      horizontal: 12,
+                    ),
                     hintText: 'Search payment notes',
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
@@ -185,7 +220,7 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                     ),
                     isDense: true,
                   ),
-                  onChanged: updateSearch,
+                  onChanged: onSearchChanged,
                 ),
               ),
             ],
@@ -194,7 +229,6 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
 
         const SizedBox(height: 12),
 
-        // Table content
         Expanded(
           child: CustomTable(
             minTableWidth: 1100,
@@ -215,48 +249,61 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                   DataCell(Text(note.vendorName)),
                   DataCell(Text(note.invoiceValue)),
                   DataCell(Text(note.date)),
-                  DataCell(Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[700],
-                          borderRadius: BorderRadius.circular(8),
+                  DataCell(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          child: Text(
+                            note.status,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        child: Text(
-                          note.status,
-                          style: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Next Approver: ${note.nextApprover}',
+                          style: const TextStyle(fontSize: 12),
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Next Approver: ${note.nextApprover}',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  )),
-                  DataCell(Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_red_eye, color: Colors.blue),
-                        onPressed: () => onViewNoteDetails(note),
-                      ),
-                      const VerticalDivider(width: 1),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => onDeleteNote(note),
-                      ),
-                    ],
-                  )),
+                      ],
+                    ),
+                  ),
+                  DataCell(
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.remove_red_eye,
+                            color: Colors.blue,
+                          ),
+                          onPressed: () => onViewNoteDetails(note),
+                        ),
+                        const VerticalDivider(width: 1),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => onDeleteNote(note),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               );
             }).toList(),
           ),
         ),
 
-        // Pagination controls bottom
+        // Pagination controls bottom (unchanged)
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
@@ -270,7 +317,9 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: currentPage > 0 ? () => gotoPage(currentPage - 1) : null,
+                    onPressed: currentPage > 0
+                        ? () => gotoPage(currentPage - 1)
+                        : null,
                   ),
                   for (int i = startWindow; i < endWindow; i++)
                     Padding(
@@ -279,11 +328,16 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: i == currentPage
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.surfaceContainerLow,
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow,
                           foregroundColor: i == currentPage
                               ? Colors.white
                               : Theme.of(context).colorScheme.onSurface,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                           minimumSize: const Size(0, 36),
                         ),
                         child: Text('${i + 1}'),
@@ -292,7 +346,9 @@ class _PaymentNotesTableState extends State<PaymentNotesTable> {
                     ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentPage < totalPages - 1 ? () => gotoPage(currentPage + 1) : null,
+                    onPressed: currentPage < totalPages - 1
+                        ? () => gotoPage(currentPage + 1)
+                        : null,
                   ),
                 ],
               ),

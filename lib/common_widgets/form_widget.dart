@@ -195,7 +195,7 @@ class _ReusableFormState extends State<ReusableForm> {
   }
 
   void handleSubmit() {
-    // Validate form fields using Flutter Form validation system
+    // Validate form fields using Flutter Form validation
     if (_formKey.currentState?.validate() ?? false) {
       // Collect all values
       final Map<String, dynamic> values = {};
@@ -205,7 +205,6 @@ class _ReusableFormState extends State<ReusableForm> {
         } else if (field.type == FormFieldType.file) {
           values[field.name] = fileInputs[field.name];
         }
-        // Note: dropdown and checkbox are managed within FormField so validation happens automatically
       }
       widget.onSubmit(values);
     }
@@ -242,7 +241,7 @@ class _ReusableFormState extends State<ReusableForm> {
             ),
             child: Form(
               key: _formKey,
-              // <-- Important: assign key here to enable validation
+              //  assign key here to enable validation
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

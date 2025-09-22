@@ -433,4 +433,3 @@ class _RoleListTableState extends State<RoleListTable> {
   }
 }
 
-// Role model example with correct copyWith (for your model file)

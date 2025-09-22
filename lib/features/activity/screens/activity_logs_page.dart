@@ -139,7 +139,6 @@ class _ActivityLogTableState extends State<ActivityLogTable> {
               ),
               DataColumn(label: SizedBox(width: 220, child: Text('Description'))),
               DataColumn(label: SizedBox(width: 120, child: Text('Time Ago'))),
-              // Remove Action column since there's no delete button
             ],
             rows: paginatedLogs.map((log) {
               return DataRow(

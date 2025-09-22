@@ -16,7 +16,7 @@ class DetailModal extends StatelessWidget {
     required String title,
     required List<Widget> contentWidgets,
     double width = 500,
-    double borderRadius = 18, // You can adjust this value
+    double borderRadius = 18, // border radius we can manage here
   }) {
     return showDialog(
       context: context,

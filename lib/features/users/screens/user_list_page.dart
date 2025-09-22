@@ -120,7 +120,7 @@ class _UserListTableState extends State<UserListTable> {
                 ),
                 const SizedBox(height: 16),
 
-                // Roles Selection with local setState
+                // Roles Selection
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -155,7 +155,7 @@ class _UserListTableState extends State<UserListTable> {
 
                 const SizedBox(height: 16),
 
-                // Active Status with local setState
+                // Active Status
                 Row(
                   children: [
                     Text(
